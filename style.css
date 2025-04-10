@@ -31,6 +31,7 @@ body {
   max-width: 700px;
   margin: var(--spacing) auto;
   padding: 0 var(--spacing);
+  position: relative;
 }
 
 header {
@@ -143,11 +144,22 @@ li {
   justify-content: space-between;
   animation: fadeIn 0.3s ease-in-out;
   transition: transform 0.2s, box-shadow 0.2s;
+  cursor: grab;
 }
 
 li:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+li.dragging {
+  opacity: 0.5;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  cursor: grabbing;
+}
+
+li.drag-over {
+  border-top: 3px solid var(--doing);
 }
 
 @keyframes fadeIn {
@@ -256,4 +268,104 @@ li:hover .status-dot {
 
 .clear-all-button:hover {
   opacity: 0.9;
+}
+
+/* Task Navigator Slider */
+.task-navigator {
+  position: absolute;
+  left: -40px;
+  width: 30px;
+  display: none;
+  z-index: 10;
+}
+
+.task-navigator.show {
+  display: block;
+}
+
+.slider-track {
+  position: absolute;
+  width: 2px;
+  background-color: var(--card);
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.slider-markers {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.task-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--card);
+  color: var(--text);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: -12px; /* Half the height to center vertically */
+  z-index: 3;
+}
+
+.task-marker:hover {
+  transform: translateX(-50%) scale(1.2);
+  background-color: var(--doing);
+  color: white;
+}
+
+.task-marker.active {
+  background-color: var(--doing);
+  color: white;
+}
+
+/* Scroll Buttons */
+.scroll-btn {
+  position: fixed;
+  bottom: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--doing);
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  transition: transform 0.2s, opacity 0.3s;
+}
+
+.scroll-btn:hover {
+  transform: scale(1.1);
+}
+
+.scroll-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scroll-up {
+  left: 20px;
+}
+
+.scroll-down {
+  right: 20px;
 }

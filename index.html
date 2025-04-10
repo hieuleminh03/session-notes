@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <button id="scroll-up-btn" class="scroll-btn scroll-up">↑</button>
+    <button id="scroll-down-btn" class="scroll-btn scroll-down">↓</button>
     <div class="container">
       <header>
         <h1>danh sách công việc</h1>
@@ -21,6 +23,11 @@
           placeholder="nhập việc cần làm, mỗi dòng 1 việc..."
         ></textarea>
         <button id="add-tasks">thêm</button>
+      </div>
+
+      <div class="task-navigator">
+        <div class="slider-track"></div>
+        <div class="slider-markers"></div>
       </div>
 
       <ul id="todo-list"></ul>
