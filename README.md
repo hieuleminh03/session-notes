@@ -3,7 +3,7 @@
 ### features
 -    [x] change theme
 -    [x] add multiple tasks (just use newline)
--    [ ] drag-and-drop
+-    [x] drag-and-drop
 -    [ ] filter/search
 -    [ ] highlighted tasks
 -    [ ] clock view
