@@ -1,0 +1,259 @@
+:root {
+  --bg: #fff;
+  --text: #333;
+  --card: #f5f5f5;
+  --doing: #3498db;
+  --later: #f1c40f;
+  --done: #2ecc71;
+  --cancelled: #e74c3c;
+  --dot-size: 12px;
+  --border-radius: 8px;
+  --spacing: 1.5rem;
+}
+
+body.dark {
+  --bg: #1a1a1a;
+  --text: #e0e0e0;
+  --card: #2d2d2d;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 700px;
+  margin: var(--spacing) auto;
+  padding: 0 var(--spacing);
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing);
+}
+
+header h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-transform: lowercase;
+  margin: 0;
+}
+
+#toggle-mode {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+#toggle-mode:hover {
+  background-color: var(--card);
+}
+
+.input-container {
+  display: none;
+  margin-bottom: var(--spacing);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.input-container.show {
+  display: block;
+}
+
+#add-task-button {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background-color: var(--card);
+  border: none;
+  border-radius: var(--border-radius);
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: var(--spacing);
+  text-align: left;
+  transition: background-color 0.2s;
+}
+
+#add-task-button:hover {
+  background-color: var(--doing);
+  color: white;
+}
+
+textarea {
+  width: 100%;
+  height: 120px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  font-size: 1rem;
+  border: 2px solid var(--card);
+  border-radius: var(--border-radius);
+  background: var(--bg);
+  color: var(--text);
+  resize: vertical;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--doing);
+}
+
+#add-tasks {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  background: var(--doing);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+#add-tasks:hover {
+  opacity: 0.9;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  background: var(--card);
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fadeIn 0.3s ease-in-out;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.status-dot {
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: 50%;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+li:hover .status-dot {
+  transform: scale(1.2);
+}
+
+.status-doing {
+  background: var(--doing);
+}
+.status-later {
+  background: var(--later);
+}
+.status-done {
+  background: var(--done);
+}
+.status-cancelled {
+  background: var(--cancelled);
+}
+
+.task-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  font-size: 1rem;
+  text-transform: lowercase;
+}
+
+.actions {
+  margin-left: 1rem;
+}
+
+.status-button {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s;
+}
+
+.status-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.status-menu {
+  position: absolute;
+  background: var(--bg);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 1000;
+  display: none;
+}
+
+.status-menu.show {
+  display: block;
+}
+
+.status-option {
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-transform: lowercase;
+}
+
+.status-option:hover {
+  background-color: var(--card);
+}
+
+.clear-all-button {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background-color: var(--cancelled);
+  border: none;
+  border-radius: var(--border-radius);
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: var(--spacing);
+  text-align: center;
+  transition: opacity 0.2s;
+}
+
+.clear-all-button:hover {
+  opacity: 0.9;
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>danh sách công việc</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>danh sách công việc</h1>
+        <button id="toggle-mode">🌙</button>
+      </header>
+
+      <button id="add-task-button">+ thêm việc cần làm</button>
+
+      <div class="input-container">
+        <textarea
+          id="input"
+          placeholder="nhập việc cần làm, mỗi dòng 1 việc..."
+        ></textarea>
+        <button id="add-tasks">thêm</button>
+      </div>
+
+      <ul id="todo-list"></ul>
+
+      <button id="clear-all" class="clear-all-button">xóa tất cả</button>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
