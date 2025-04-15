@@ -2,6 +2,7 @@ const input = document.getElementById('input');
 const addBtn = document.getElementById('add-tasks');
 const list = document.getElementById('todo-list');
 const toggleMode = document.getElementById('toggle-mode');
+const toggleTimer = document.getElementById('toggle-timer');
 const addTaskButton = document.getElementById('add-task-button');
 const inputContainer = document.querySelector('.input-container');
 const clearAllButton = document.getElementById('clear-all');
@@ -9,6 +10,22 @@ const taskNavigator = document.querySelector('.task-navigator');
 const sliderMarkers = document.querySelector('.slider-markers');
 const scrollUpBtn = document.getElementById('scroll-up-btn');
 const scrollDownBtn = document.getElementById('scroll-down-btn');
+
+// Timer elements
+const timerContainer = document.getElementById('timer-container');
+const closeTimerBtn = document.getElementById('close-timer');
+const hoursInput = document.getElementById('hours-input');
+const minutesInput = document.getElementById('minutes-input');
+const enableBreaksCheckbox = document.getElementById('enable-breaks');
+const breakOptionsDiv = document.querySelector('.break-options');
+const workIntervalInput = document.getElementById('work-interval');
+const breakIntervalInput = document.getElementById('break-interval');
+const timeRemainingDisplay = document.getElementById('time-remaining');
+const intervalStatusDisplay = document.getElementById('interval-status');
+const startTimerBtn = document.getElementById('start-timer');
+const pauseTimerBtn = document.getElementById('pause-timer');
+const resumeTimerBtn = document.getElementById('resume-timer');
+const resetTimerBtn = document.getElementById('reset-timer');
 
 const STORAGE_KEY = 'todo-tasks';
 const THEME_KEY = 'dark-mode';
@@ -514,6 +531,295 @@ scrollUpBtn.addEventListener('click', (e) => {
     }
     
     lastClickTime = currentTime;
+});
+
+// Timer Constants and State
+const TIMER_STORAGE_KEY = 'timer-settings';
+const TIMER_VISIBILITY_KEY = 'timer-visible';
+let timerIntervalId = null;
+let totalSeconds = 0;
+let remainingSeconds = 0;
+let isPaused = false;
+let isBreak = false;
+let completedWorkIntervals = 0;
+let workDurationSeconds = 0;
+let breakDurationSeconds = 0;
+
+// Audio notification for when timer completes or switches between work/break
+const timerAudio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YWoGAAAAAAEA/v8CAP//AAABAP7/AgD//wAAAQD+/wIA//8AAAAA');
+
+// Load saved timer settings and visibility
+document.addEventListener('DOMContentLoaded', () => {
+    loadTimerSettings();
+    loadTimerVisibility();
+});
+
+function loadTimerSettings() {
+    const savedSettings = localStorage.getItem(TIMER_STORAGE_KEY);
+    if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        hoursInput.value = settings.hours || 1;
+        minutesInput.value = settings.minutes || 0;
+        enableBreaksCheckbox.checked = settings.enableBreaks || false;
+        workIntervalInput.value = settings.workInterval || 25;
+        breakIntervalInput.value = settings.breakInterval || 5;
+        
+        // Show/hide break options based on checkbox
+        breakOptionsDiv.classList.toggle('hidden', !enableBreaksCheckbox.checked);
+    }
+}
+
+function loadTimerVisibility() {
+    const isVisible = localStorage.getItem(TIMER_VISIBILITY_KEY) === 'true';
+    if (isVisible) {
+        timerContainer.classList.remove('hidden');
+        document.body.classList.add('timer-active');
+    }
+}
+
+function saveTimerSettings() {
+    const settings = {
+        hours: parseInt(hoursInput.value) || 0,
+        minutes: parseInt(minutesInput.value) || 0,
+        enableBreaks: enableBreaksCheckbox.checked,
+        workInterval: parseInt(workIntervalInput.value) || 25,
+        breakInterval: parseInt(breakIntervalInput.value) || 5
+    };
+    localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(settings));
+}
+
+// Timer Toggle Button
+toggleTimer.addEventListener('click', () => {
+    timerContainer.classList.toggle('hidden');
+    const isVisible = !timerContainer.classList.contains('hidden');
+    document.body.classList.toggle('timer-active', isVisible);
+    localStorage.setItem(TIMER_VISIBILITY_KEY, isVisible);
+});
+
+// Close Timer Button
+closeTimerBtn.addEventListener('click', () => {
+    timerContainer.classList.add('hidden');
+    document.body.classList.remove('timer-active');
+    localStorage.setItem(TIMER_VISIBILITY_KEY, false);
+});
+
+// Enable/Disable Break Options
+enableBreaksCheckbox.addEventListener('change', () => {
+    breakOptionsDiv.classList.toggle('hidden', !enableBreaksCheckbox.checked);
+    saveTimerSettings();
+});
+
+// Format time as HH:MM:SS
+function formatTime(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    
+    return [
+        h.toString().padStart(2, '0'),
+        m.toString().padStart(2, '0'),
+        s.toString().padStart(2, '0')
+    ].join(':');
+}
+
+// Update timer display
+function updateTimerDisplay() {
+    timeRemainingDisplay.textContent = formatTime(remainingSeconds);
+    
+    if (enableBreaksCheckbox.checked) {
+        intervalStatusDisplay.classList.remove('hidden');
+        intervalStatusDisplay.textContent = isBreak ? 'breaking' : 'working';
+        intervalStatusDisplay.className = isBreak ? 'break' : 'work';
+    } else {
+        intervalStatusDisplay.classList.add('hidden');
+    }
+    
+    document.title = `(${formatTime(remainingSeconds)}) danh sách công việc`;
+}
+
+// Start the timer
+function startTimer() {
+    // Clear any existing interval
+    if (timerIntervalId) {
+        clearInterval(timerIntervalId);
+    }
+    
+    // Calculate total seconds from inputs
+    const hours = parseInt(hoursInput.value) || 0;
+    const minutes = parseInt(minutesInput.value) || 0;
+    totalSeconds = hours * 3600 + minutes * 60;
+    remainingSeconds = totalSeconds;
+    
+    // If breaks are enabled, set interval durations
+    if (enableBreaksCheckbox.checked) {
+        workDurationSeconds = parseInt(workIntervalInput.value) * 60 || 1500; // Default to 25 minutes
+        breakDurationSeconds = parseInt(breakIntervalInput.value) * 60 || 300; // Default to 5 minutes
+        isBreak = false;
+        completedWorkIntervals = 0;
+    }
+    
+    // Save settings
+    saveTimerSettings();
+    
+    // Hide setup, show timer
+    startTimerBtn.classList.add('hidden');
+    pauseTimerBtn.classList.remove('hidden');
+    resumeTimerBtn.classList.add('hidden');
+    
+    // Start countdown
+    isPaused = false;
+    updateTimerDisplay();
+    
+    timerIntervalId = setInterval(() => {
+        if (remainingSeconds <= 0) {
+            // Timer complete
+            clearInterval(timerIntervalId);
+            timerAudio.play();
+            resetTimer();
+            // Send notification if supported
+            if (Notification.permission === 'granted') {
+                new Notification('Thời gian đã hết!', {
+                    body: 'Session đã hoàn thành.',
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><circle cx="50" cy="50" r="45" fill="%233498db"/></svg>'
+                });
+            }
+            return;
+        }
+        
+        remainingSeconds--;
+        updateTimerDisplay();
+        
+        // Handle work/break intervals if enabled
+        if (enableBreaksCheckbox.checked) {
+            let currentIntervalDuration = isBreak ? breakDurationSeconds : workDurationSeconds;
+            let totalIntervalSeconds = calculateTotalIntervalSeconds();
+            let secondsInCurrentInterval = totalIntervalSeconds % (workDurationSeconds + breakDurationSeconds);
+            
+            // Check if we need to switch between work and break
+            if (!isBreak && secondsInCurrentInterval >= workDurationSeconds) {
+                // Switch to break
+                isBreak = true;
+                completedWorkIntervals++;
+                intervalStatusDisplay.textContent = 'Nghỉ';
+                intervalStatusDisplay.className = 'break';
+                timerAudio.play();
+                
+                // Notification
+                if (Notification.permission === 'granted') {
+                    new Notification('Thời gian nghỉ!', {
+                        body: 'Hãy nghỉ ngơi 5 phút.',
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><circle cx="50" cy="50" r="45" fill="%23f1c40f"/></svg>'
+                    });
+                }
+            } else if (isBreak && secondsInCurrentInterval >= workDurationSeconds + breakDurationSeconds) {
+                // Switch back to work
+                isBreak = false;
+                intervalStatusDisplay.textContent = 'Làm việc';
+                intervalStatusDisplay.className = 'work';
+                timerAudio.play();
+                
+                // Notification
+                if (Notification.permission === 'granted') {
+                    new Notification('Quay lại làm việc!', {
+                        body: 'Đã đến lúc tiếp tục làm việc.',
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><circle cx="50" cy="50" r="45" fill="%233498db"/></svg>'
+                    });
+                }
+            }
+        }
+    }, 1000);
+    
+    // Request notification permission
+    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
+    }
+}
+
+// Calculate total seconds elapsed in work/break intervals
+function calculateTotalIntervalSeconds() {
+    return totalSeconds - remainingSeconds;
+}
+
+// Pause the timer
+function pauseTimer() {
+    if (timerIntervalId) {
+        clearInterval(timerIntervalId);
+        timerIntervalId = null;
+        isPaused = true;
+        pauseTimerBtn.classList.add('hidden');
+        resumeTimerBtn.classList.remove('hidden');
+    }
+}
+
+// Resume the timer
+function resumeTimer() {
+    isPaused = false;
+    pauseTimerBtn.classList.remove('hidden');
+    resumeTimerBtn.classList.add('hidden');
+    
+    timerIntervalId = setInterval(() => {
+        if (remainingSeconds <= 0) {
+            clearInterval(timerIntervalId);
+            timerAudio.play();
+            resetTimer();
+            return;
+        }
+        
+        remainingSeconds--;
+        updateTimerDisplay();
+        
+        // Handle work/break intervals if enabled (same logic as in startTimer)
+        if (enableBreaksCheckbox.checked) {
+            let currentIntervalDuration = isBreak ? breakDurationSeconds : workDurationSeconds;
+            let totalIntervalSeconds = calculateTotalIntervalSeconds();
+            let secondsInCurrentInterval = totalIntervalSeconds % (workDurationSeconds + breakDurationSeconds);
+            
+            if (!isBreak && secondsInCurrentInterval >= workDurationSeconds) {
+                isBreak = true;
+                completedWorkIntervals++;
+                intervalStatusDisplay.textContent = 'Nghỉ';
+                intervalStatusDisplay.className = 'break';
+                timerAudio.play();
+            } else if (isBreak && secondsInCurrentInterval >= workDurationSeconds + breakDurationSeconds) {
+                isBreak = false;
+                intervalStatusDisplay.textContent = 'Làm việc';
+                intervalStatusDisplay.className = 'work';
+                timerAudio.play();
+            }
+        }
+    }, 1000);
+}
+
+// Reset the timer
+function resetTimer() {
+    if (timerIntervalId) {
+        clearInterval(timerIntervalId);
+        timerIntervalId = null;
+    }
+    
+    isPaused = false;
+    isBreak = false;
+    remainingSeconds = 0;
+    completedWorkIntervals = 0;
+    
+    startTimerBtn.classList.remove('hidden');
+    pauseTimerBtn.classList.add('hidden');
+    resumeTimerBtn.classList.add('hidden');
+    
+    timeRemainingDisplay.textContent = '00:00:00';
+    intervalStatusDisplay.classList.add('hidden');
+    document.title = 'danh sách công việc';
+}
+
+// Timer control event listeners
+startTimerBtn.addEventListener('click', startTimer);
+pauseTimerBtn.addEventListener('click', pauseTimer);
+resumeTimerBtn.addEventListener('click', resumeTimer);
+resetTimerBtn.addEventListener('click', resetTimer);
+
+// Save settings when inputs change
+[hoursInput, minutesInput, workIntervalInput, breakIntervalInput].forEach(input => {
+    input.addEventListener('change', saveTimerSettings);
 });
 
 // Scroll down button functionality

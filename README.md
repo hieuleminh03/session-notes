@@ -6,7 +6,7 @@
 -    [x] drag-and-drop
 -    [ ] filter/search
 -    [ ] highlighted tasks
--    [ ] clock view
+-    [x] clock view
 -    [ ] deadline
 -    [ ] import/export as other format (json)
 

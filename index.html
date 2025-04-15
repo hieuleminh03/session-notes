@@ -10,10 +10,13 @@
     <button id="scroll-up-btn" class="scroll-btn scroll-up">↑</button>
     <button id="scroll-down-btn" class="scroll-btn scroll-down">↓</button>
     <div class="container">
-      <header>
-        <h1>danh sách công việc</h1>
+    <header>
+      <h1>danh sách công việc</h1>
+      <div class="header-buttons">
+        <button id="toggle-timer">⏱️</button>
         <button id="toggle-mode">🌙</button>
-      </header>
+      </div>
+    </header>
 
       <button id="add-task-button">+ thêm việc cần làm</button>
 
@@ -33,6 +36,59 @@
       <ul id="todo-list"></ul>
 
       <button id="clear-all" class="clear-all-button">xóa tất cả</button>
+    </div>
+
+    <div id="timer-container" class="timer-container hidden">
+      <div class="timer-header">
+        <h2>bộ đếm thời gian</h2>
+        <button id="close-timer">×</button>
+      </div>
+      
+      <div class="timer-setup">
+        <div class="setup-section">
+          <h3>thời gian làm việc</h3>
+          <div class="time-inputs">
+            <div class="time-input">
+              <label for="hours-input">giờ:</label>
+              <input type="number" id="hours-input" min="0" max="24" value="1">
+            </div>
+            <div class="time-input">
+              <label for="minutes-input">phút:</label>
+              <input type="number" id="minutes-input" min="0" max="59" value="0">
+            </div>
+          </div>
+        </div>
+        
+        <div class="setup-section">
+          <div class="break-toggle">
+            <input type="checkbox" id="enable-breaks">
+            <label for="enable-breaks">bật giờ nghỉ theo ca</label>
+          </div>
+          
+          <div class="break-options hidden">
+            <div class="time-input">
+              <label for="work-interval">làm việc (phút):</label>
+              <input type="number" id="work-interval" min="1" max="120" value="25">
+            </div>
+            <div class="time-input">
+              <label for="break-interval">nghỉ (phút):</label>
+              <input type="number" id="break-interval" min="1" max="30" value="5">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="timer-display">
+        <div id="time-remaining">00:00:00</div>
+        <div id="interval-status" class="hidden"></div>
+      </div>
+      
+      <div class="timer-controls">
+        <button id="start-timer">bắt đầu</button>
+        <button id="pause-timer" class="hidden">tạm dừng</button>
+        <button id="resume-timer" class="hidden">tiếp tục</button>
+        <button id="reset-timer">đặt lại</button>
+      </div>
     </div>
 
     <script src="script.js"></script>

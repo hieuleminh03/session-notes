@@ -48,7 +48,12 @@ header h1 {
   margin: 0;
 }
 
-#toggle-mode {
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+#toggle-mode, #toggle-timer {
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -367,5 +372,231 @@ li:hover .status-dot {
 }
 
 .scroll-down {
-  right: 20px;
+  left: 70px;
+}
+
+body.timer-active .scroll-up {
+  left: 40px;
+}
+
+body.timer-active .scroll-down {
+  left: 90px;
+}
+
+/* Timer Styles */
+.timer-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 100vh;
+  background-color: var(--bg);
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 0.8s ease;
+  box-sizing: border-box;
+  overflow-y: auto;
+  border-left: 1px solid var(--card);
+}
+
+.timer-container.hidden {
+  transform: translateX(100%);
+}
+
+body.timer-active .container {
+  width: 50%;
+  max-width: 50%;
+  margin-right: 5%;
+  margin-left: 5%;
+  transition: all 0.8s ease;
+}
+
+body.timer-active li {
+  padding: 0.8rem;
+}
+
+body.timer-active .status-button {
+  padding: 0.4rem 0.8rem;
+}
+
+.timer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--card);
+}
+
+.timer-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+#close-timer {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px;
+  color: var(--text);
+}
+
+.timer-setup {
+  margin-bottom: 40px;
+}
+
+.setup-section {
+  margin-bottom: 30px;
+}
+
+.setup-section h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.time-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.time-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.time-input label {
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.time-input input {
+  width: 60px;
+  padding: 8px;
+  border: 1px solid var(--card);
+  border-radius: var(--border-radius);
+  background-color: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.break-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  width: fit-content;
+}
+
+.break-toggle input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.break-options {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 15px auto 0;
+  max-width: 300px;
+}
+
+.break-options.hidden {
+  display: none;
+}
+
+.timer-display {
+  text-align: center;
+  margin: 30px 0 40px;
+  padding: 20px;
+  background-color: var(--card);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#time-remaining {
+  font-size: 4.5rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+  color: var(--doing);
+  margin-bottom: 15px;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  line-height: 1;
+}
+
+#interval-status {
+  font-size: 1.3rem;
+  padding: 5px 0;
+  display: inline-block;
+  font-weight: 500;
+}
+
+#interval-status.hidden {
+  display: none;
+}
+
+#interval-status.work {
+  color: var(--doing);
+}
+
+#interval-status.break {
+  color: var(--later);
+}
+
+.timer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.timer-controls button {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.timer-controls button:active {
+  transform: scale(0.98);
+}
+
+#start-timer, #resume-timer {
+  background-color: var(--done);
+  color: white;
+}
+
+#pause-timer {
+  background-color: var(--later);
+  color: white;
+}
+
+#reset-timer {
+  background-color: var(--cancelled);
+  color: white;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#toggle-timer:hover {
+  background-color: var(--card);
 }
