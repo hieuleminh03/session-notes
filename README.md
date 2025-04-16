@@ -10,6 +10,7 @@
 -    [ ] deadline
 -    [ ] import/export as other format (json)
 -    [x] note on each task
+-    [ ] multi language
 
 ### additional information
   - currently i use local storage to save data
