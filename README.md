@@ -9,6 +9,7 @@
 -    [x] clock view
 -    [ ] deadline
 -    [ ] import/export as other format (json)
+-    [x] note on each task
 
 ### additional information
   - currently i use local storage to save data

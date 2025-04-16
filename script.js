@@ -30,6 +30,7 @@ const resetTimerBtn = document.getElementById('reset-timer');
 const STORAGE_KEY = 'todo-tasks';
 const THEME_KEY = 'dark-mode';
 const TASKS_PER_GROUP = 5; // Number of tasks per marker
+const NOTE_ICON = '✎'; // Pencil icon for edit button
 
 // Track the currently dragged item
 let draggedItem = null;
@@ -69,7 +70,7 @@ function loadTasks() {
     const savedTasks = localStorage.getItem(STORAGE_KEY);
     if (savedTasks) {
         const tasks = JSON.parse(savedTasks);
-        tasks.forEach(task => addTask(task.text, task.status));
+        tasks.forEach(task => addTask(task.text, task.status, task.note || ''));
         updateTaskNavigator();
     }
 }
@@ -77,7 +78,8 @@ function loadTasks() {
 function saveTasks() {
     const tasks = Array.from(list.children).map(li => ({
         text: li.querySelector('.task-content span').textContent,
-        status: li.dataset.status
+        status: li.dataset.status,
+        note: li.dataset.note || ''
     }));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     updateTaskNavigator();
@@ -147,9 +149,10 @@ function createStatusMenu() {
     return menu;
 }
 
-function addTask(text, status = 'doing') {
+function addTask(text, status = 'doing', note = '') {
     const li = document.createElement('li');
     li.dataset.status = status;
+    li.dataset.note = note;
     li.draggable = true;  // Make the list item draggable
 
     // Add drag and drop event listeners
@@ -159,6 +162,10 @@ function addTask(text, status = 'doing') {
     li.addEventListener('dragenter', handleDragEnter);
     li.addEventListener('dragleave', handleDragLeave);
     li.addEventListener('drop', handleDrop);
+
+    // Create the task container
+    const taskContainer = document.createElement('div');
+    taskContainer.className = 'task-container';
 
     const dot = document.createElement('div');
     dot.className = `status-dot ${statusClasses[status]}`;
@@ -170,6 +177,19 @@ function addTask(text, status = 'doing') {
     taskContent.className = 'task-content';
     taskContent.appendChild(dot);
     taskContent.appendChild(span);
+    
+    // Add click event to whole task content area for toggling note visibility
+    taskContent.addEventListener('click', (e) => {
+        // Don't trigger when clicking on status button or its menu
+        if (e.target.closest('.status-button') || e.target.closest('.status-menu')) {
+            return;
+        }
+        
+        const noteContainer = li.querySelector('.note-container');
+        if (noteContainer) {
+            noteContainer.classList.toggle('show');
+        }
+    });
 
     const statusButton = document.createElement('button');
     statusButton.className = 'status-button';
@@ -218,8 +238,66 @@ function addTask(text, status = 'doing') {
     actions.className = 'actions';
     actions.appendChild(statusButton);
 
-    li.appendChild(taskContent);
-    li.appendChild(actions);
+    taskContainer.appendChild(taskContent);
+    taskContainer.appendChild(actions);
+    li.appendChild(taskContainer);
+
+    // Create note container (hidden by default)
+    const noteContainer = document.createElement('div');
+    noteContainer.className = 'note-container';
+
+    const noteContent = document.createElement('div');
+    noteContent.className = 'note-content';
+    noteContent.textContent = note;
+
+    const editButton = document.createElement('button');
+    editButton.className = 'edit-note-button';
+    editButton.textContent = NOTE_ICON;
+    editButton.addEventListener('click', () => {
+        // Create an input element for editing
+        const input = document.createElement('textarea');
+        input.value = noteContent.textContent;
+        input.className = 'note-edit-input';
+        
+        // Replace the note content with the input
+        noteContainer.replaceChild(input, noteContent);
+        noteContainer.removeChild(editButton);
+        
+        // Create save button
+        const saveButton = document.createElement('button');
+        saveButton.className = 'save-note-button';
+        saveButton.textContent = '✓';
+        noteContainer.appendChild(saveButton);
+        
+        // Focus the input
+        input.focus();
+        
+        // Save on button click
+        saveButton.addEventListener('click', () => {
+            const newNote = input.value.trim();
+            li.dataset.note = newNote;
+            noteContent.textContent = newNote;
+            
+            // Restore original layout
+            noteContainer.replaceChild(noteContent, input);
+            noteContainer.removeChild(saveButton);
+            noteContainer.appendChild(editButton);
+            
+            saveTasks();
+        });
+        
+        // Save on Enter key (allow shift+enter for new lines)
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                saveButton.click();
+            }
+        });
+    });
+
+    noteContainer.appendChild(noteContent);
+    noteContainer.appendChild(editButton);
+    li.appendChild(noteContainer);
 
     list.appendChild(li);
     reorderTasks();
